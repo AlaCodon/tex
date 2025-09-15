@@ -3,6 +3,44 @@ name: Build LaTeX Documents
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      working_directory:
+        description: "Working directory"
+        required: false
+        default: "."
+      create_release:
+        description: "Create GitHub Release"
+        required: false
+        type: boolean
+        default: true
+      push_to_releases_branch:
+        description: "Push PDFs to releases branch"
+        required: false
+        type: boolean
+        default: true
+      release_tag_prefix:
+        description: "Release tag prefix"
+        required: false
+        default: "rel"
+      releases_branch_name:
+        description: "Releases branch name"
+        required: false
+        default: "releases"
+      artifact_name:
+        description: "Artifact base name"
+        required: false
+        default: "pdfs"
+      keep_build_deps:
+        description: "Upload TeX Live packages list artifact"
+        required: false
+        type: boolean
+        default: false
+      keep_build_artifacts:
+        description: "Upload working directory as artifact"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -11,15 +49,15 @@ jobs:
       contents: write
 
     env:
-      WORKING_DIRECTORY: "."
-      CREATE_RELEASE: true
-      RELEASE_TAG_PREFIX: "rel"
-      PUSH_TO_RELEASES_BRANCH: true
-      RELEASES_BRANCH_NAME: "releases"
+      WORKING_DIRECTORY: ${{ github.event.inputs.working_directory || '.' }}
+      CREATE_RELEASE: ${{ github.event.inputs.create_release || 'true' }}
+      RELEASE_TAG_PREFIX: ${{ github.event.inputs.release_tag_prefix || 'rel' }}
+      PUSH_TO_RELEASES_BRANCH: ${{ github.event.inputs.push_to_releases_branch || 'true' }}
+      RELEASES_BRANCH_NAME: ${{ github.event.inputs.releases_branch_name || 'releases' }}
 
-      ARTIFACT_NAME: "pdfs"
-      KEEP_BUILD_DEPS: false
-      KEEP_BUILD_ARTIFACTS: false
+      ARTIFACT_NAME: ${{ github.event.inputs.artifact_name || 'pdfs' }}
+      KEEP_BUILD_DEPS: ${{ github.event.inputs.keep_build_deps || 'false' }}
+      KEEP_BUILD_ARTIFACTS: ${{ github.event.inputs.keep_build_artifacts || 'false' }}
 
     steps:
       - name: Checkout repository
@@ -64,6 +102,7 @@ jobs:
         id: meta
         shell: bash
         run: |
+          set -euo pipefail
           TITLE="$(git log -1 --pretty=%s)"
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           TAG="${{ env.RELEASE_TAG_PREFIX }}-$(date -u +'%Y%m%d-%H%M%S')-${GITHUB_SHA::7}"
