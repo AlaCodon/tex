@@ -80,7 +80,7 @@ jobs:
 
       - name: Upload build deps
         if: env.KEEP_BUILD_DEPS == 'true'
-        uses: actions/upload-artifact@v5.0.0
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ env.ARTIFACT_NAME }}-build-deps
           path: |
@@ -90,7 +90,7 @@ jobs:
           
       - name: Upload build artifacts
         if: env.KEEP_BUILD_ARTIFACTS == 'true'
-        uses: actions/upload-artifact@v5.0.0
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ env.ARTIFACT_NAME }}-build-artifacts
           path: ${{ env.WORKING_DIRECTORY }}/
